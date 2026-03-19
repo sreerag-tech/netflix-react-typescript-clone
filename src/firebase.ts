@@ -1,16 +1,40 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import {  getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,  signOut,} from "firebase/auth";
+import { getFirestore, doc, setDoc} from "firebase/firestore";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBKG8Z7MDqQbit_U4oOpmzip0L_LM81ris",
-  authDomain: "netflix-react-ts-5ae7d.firebaseapp.com",
-  projectId: "netflix-react-ts-5ae7d",
-  storageBucket: "netflix-react-ts-5ae7d.firebasestorage.app",
-  messagingSenderId: "433492895092",
-  appId: "1:433492895092:web:912c571a29cee301637821"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
 };
-
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+
+export const signup = async (
+  name: string,
+  email: string,
+  password: string
+) => {
+  const res = await createUserWithEmailAndPassword(auth, email, password);
+  const user = res.user;
+
+  await setDoc(doc(db, "users", user.uid), {
+    uid: user.uid,
+    name,
+    email,
+    authProvider: "local",
+    createdAt: new Date(),
+  });
+};
+
+export const login = async (email: string, password: string) => {
+  await signInWithEmailAndPassword(auth, email, password);
+};
+
+export const logout = async () => {
+  await signOut(auth);
+};

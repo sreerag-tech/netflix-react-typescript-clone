@@ -1,11 +1,17 @@
-// src/api/tmdb.ts
-import axios from "axios";
+const BASE_URL = "https://api.themoviedb.org/3";
 
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+export const tmdbFetch = async (endpoint: string) => {
+    const apiKey = import.meta.env.VITE_TMDB_API_KEY;
+    if (!apiKey) {
+        throw new Error("Missing VITE_TMDB_API_KEY");
+    }
 
-export const tmdb = axios.create({
-  baseURL: "https://api.themoviedb.org/3",
-});
+    const url = `${BASE_URL}${endpoint}${endpoint.includes("?") ? "&" : "?"}api_key=${apiKey}`;
+    const res = await fetch(url);
 
-export const fetchTrending = () =>
-  tmdb.get(`/trending/movie/week?api_key=${API_KEY}`);
+    if (!res.ok) {
+        throw new Error("TMDB fetch failed");
+    }
+
+    return res.json();
+};
